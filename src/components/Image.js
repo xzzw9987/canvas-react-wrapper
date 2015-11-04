@@ -28,7 +28,6 @@ var ReactImage = React.createClass({
             });
         });
         return null;
-    },
-    _x: [1, 2, 3]
+    }
 });
 export default ReactImage;
