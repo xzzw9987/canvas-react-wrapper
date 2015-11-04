@@ -4,25 +4,22 @@ export default function drawEnv(context) {
 
     function loop(index, callbackMap) {
         var {callback,options} = callbackMap[index] || {};
-        if (callback) {
-            context.save();
-            for (var key in options) {
-                context[key] = options[key];
-            }
-            context.beginPath();
-            var ret = callback(context);
-            options.end ? context.closePath() : void 0;
-            context.stroke();
-            context.restore();
-            if (ret instanceof Promise) {
-                ret
-                    .then(loop.bind(null, index + 1, callbackMap))
-                    .catch(loop.bind(null, index + 1, callbackMap));
-            }
-            else {
-                loop(index + 1, callbackMap);
-            }
+        if (!callback)
+            return;
+        context.save();
+        for (var key in options) {
+            context[key] = options[key];
         }
+        context.beginPath();
+        var ret = callback(context);
+        options.end ? context.closePath() : void 0;
+        context.stroke();
+        context.restore();
+        ret instanceof Promise ?
+            ret.then(loop.bind(null, index + 1, callbackMap))
+                .catch(loop.bind(null, index + 1, callbackMap))
+            : loop(index + 1, callbackMap);
+
     }
 
     function add(callback, options = {}) {
