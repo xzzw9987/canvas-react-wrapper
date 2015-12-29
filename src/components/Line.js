@@ -1,8 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 var Line = React.createClass({
+    contextTypes: {
+        env: React.PropTypes.object
+    },
     render(){
-        var {env,points} = this.props;
+        var {points} = this.props;
+        var {env} = this.context;
         points = points || [];
         env.add((context)=> {
             points.forEach((point, index)=> {

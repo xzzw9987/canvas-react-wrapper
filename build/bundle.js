@@ -60,11 +60,11 @@
 
 	var _componentsCanvas2 = _interopRequireDefault(_componentsCanvas);
 
-	var _componentsLine = __webpack_require__(174);
+	var _componentsLine = __webpack_require__(175);
 
 	var _componentsLine2 = _interopRequireDefault(_componentsLine);
 
-	var _componentsImage = __webpack_require__(218);
+	var _componentsImage = __webpack_require__(176);
 
 	var _componentsImage2 = _interopRequireDefault(_componentsImage);
 
@@ -19669,36 +19669,43 @@
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _drawEnv = __webpack_require__(175);
+	var _drawEnv = __webpack_require__(174);
 
 	var _drawEnv2 = _interopRequireDefault(_drawEnv);
 
 	var Canvas = _react2['default'].createClass({
 	    displayName: 'Canvas',
 
+	    childContextTypes: {
+	        env: _react2['default'].PropTypes.object
+	    },
+	    getChildContext: function getChildContext() {
+	        var env = this._env;
+	        return {
+	            env: env
+	        };
+	    },
 	    render: function render() {
-	        var _this = this;
-
 	        return _react2['default'].createElement(
 	            'canvas',
 	            _extends({}, this.props, { ref: 'canvas' }),
-	            this.env ? _react2['default'].Children.map(this.props.children, function (child) {
-	                return _react2['default'].cloneElement(child, { env: _this.env });
+	            this._env ? _react2['default'].Children.map(this.props.children, function (child) {
+	                return _react2['default'].cloneElement(child);
 	            }) : null
 	        );
 	    },
 	    componentDidMount: function componentDidMount() {
 	        // Get the Real DOM
-	        this.env = (0, _drawEnv2['default'])(this.refs.canvas.getContext('2d'));
+	        this._env = (0, _drawEnv2['default'])(this.refs.canvas.getContext('2d'));
 
 	        // And then Re-Render
-	        this.forceUpdate();
+	        this.setState({});
 	    },
 	    componentWillUpdate: function componentWillUpdate() {
-	        this.env.clear();
+	        this._env.clear();
 	    },
 	    componentDidUpdate: function componentDidUpdate() {
-	        this.env.render();
+	        this._env.render();
 	    }
 	});
 	exports['default'] = Canvas;
@@ -19928,6 +19935,60 @@
 
 /***/ },
 /* 174 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports["default"] = drawEnv;
+	var Promise = window.Promise;
+
+	function drawEnv(context) {
+	    var callbackMap = [];
+
+	    function loop(index, callbackMap) {
+	        var _ref = callbackMap[index] || {};
+
+	        var callback = _ref.callback;
+	        var options = _ref.options;
+
+	        if (!callback) return;
+	        context.save();
+	        for (var key in options) {
+	            context[key] = options[key];
+	        }
+	        context.beginPath();
+	        var ret = callback(context);
+	        options.end ? context.closePath() : void 0;
+	        context.stroke();
+	        context.restore();
+	        ret instanceof Promise ? ret.then(loop.bind(null, index + 1, callbackMap))["catch"](loop.bind(null, index + 1, callbackMap)) : loop(index + 1, callbackMap);
+	    }
+
+	    function add(callback) {
+	        var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	        callbackMap.push({ callback: callback, options: options });
+	    }
+
+	    function render() {
+	        loop(0, callbackMap);
+	    }
+
+	    function clear() {
+	        callbackMap = [];
+	        context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+	    }
+
+	    return { add: add, render: render, clear: clear };
+	}
+
+	module.exports = exports["default"];
+
+/***/ },
+/* 175 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19949,10 +20010,12 @@
 	var Line = _react2['default'].createClass({
 	    displayName: 'Line',
 
+	    contextTypes: {
+	        env: _react2['default'].PropTypes.object
+	    },
 	    render: function render() {
-	        var _props = this.props;
-	        var env = _props.env;
-	        var points = _props.points;
+	        var points = this.props.points;
+	        var env = this.context.env;
 
 	        points = points || [];
 	        env.add(function (context) {
@@ -19973,108 +20036,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 175 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports["default"] = drawEnv;
-	var Promise = window.Promise;
-
-	function drawEnv(context) {
-	    var callbackMap = [];
-
-	    function add(callback) {
-	        var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-	        callbackMap.push({ callback: callback, options: options });
-	    }
-
-	    function render() {
-	        var index = 0;
-	        loop();
-	        function loop() {
-	            var _ref = callbackMap[index++] || {};
-
-	            var callback = _ref.callback;
-	            var options = _ref.options;
-
-	            if (callback) {
-	                context.save();
-	                for (var key in options) {
-	                    context[key] = options[key];
-	                }
-	                context.beginPath();
-	                var ret = callback(context);
-	                options.end ? context.closePath() : void 0;
-	                context.stroke();
-	                context.restore();
-	                if (ret instanceof Promise) {
-	                    ret.then(loop)["catch"](loop);
-	                } else {
-	                    loop();
-	                }
-	            }
-	        }
-	    }
-
-	    function clear() {
-	        callbackMap = [];
-	        context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-	    }
-
-	    return { add: add, render: render, clear: clear };
-	}
-
-	module.exports = exports["default"];
-
-/***/ },
-/* 176 */,
-/* 177 */,
-/* 178 */,
-/* 179 */,
-/* 180 */,
-/* 181 */,
-/* 182 */,
-/* 183 */,
-/* 184 */,
-/* 185 */,
-/* 186 */,
-/* 187 */,
-/* 188 */,
-/* 189 */,
-/* 190 */,
-/* 191 */,
-/* 192 */,
-/* 193 */,
-/* 194 */,
-/* 195 */,
-/* 196 */,
-/* 197 */,
-/* 198 */,
-/* 199 */,
-/* 200 */,
-/* 201 */,
-/* 202 */,
-/* 203 */,
-/* 204 */,
-/* 205 */,
-/* 206 */,
-/* 207 */,
-/* 208 */,
-/* 209 */,
-/* 210 */,
-/* 211 */,
-/* 212 */,
-/* 213 */,
-/* 214 */,
-/* 215 */,
-/* 216 */,
-/* 217 */,
-/* 218 */
+/* 176 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20094,11 +20056,13 @@
 	var ReactImage = _react2['default'].createClass({
 	    displayName: 'ReactImage',
 
+	    contextTypes: {
+	        env: _react2['default'].PropTypes.object
+	    },
 	    render: function render() {
 	        var cachedImages = this.cachedImages = this.cachedImages || {};
-	        var _props = this.props;
-	        var env = _props.env;
-	        var src = _props.src;
+	        var src = this.props.src;
+	        var env = this.context.env;
 
 	        env.add(function (context) {
 	            var ahref = document.createElement('a');
@@ -20124,8 +20088,7 @@
 	            });
 	        });
 	        return null;
-	    },
-	    _x: [1, 2, 3]
+	    }
 	});
 	exports['default'] = ReactImage;
 	module.exports = exports['default'];

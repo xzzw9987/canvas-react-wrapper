@@ -1,9 +1,13 @@
 var Promise = window.Promise;
 import React from 'react';
 var ReactImage = React.createClass({
+    contextTypes: {
+        env: React.PropTypes.object
+    },
     render(){
         var cachedImages = this.cachedImages = this.cachedImages || {};
-        var {env,src} = this.props;
+        var {src} = this.props;
+        var {env} = this.context;
         env.add((context)=> {
             var ahref = document.createElement('a');
             ahref.href = src;

@@ -34,5 +34,6 @@ module.exports = {
                     optional: ['runtime']
                 }
             }]
-    }
+    },
+    watch: true
 };
