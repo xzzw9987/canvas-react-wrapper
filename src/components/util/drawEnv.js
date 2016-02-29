@@ -1,4 +1,5 @@
 var Promise = window.Promise;
+import math from 'mathjs';
 export default function drawEnv(context) {
     var callbackMap = [];
 

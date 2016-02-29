@@ -1,23 +1,20 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import drawEnv from './drawEnv';
+import drawEnv from './util/drawEnv';
 var Canvas = React.createClass({
     childContextTypes: {
-        env: React.PropTypes.object
+        env: React.PropTypes.object,
+        transform: React.PropTypes.array
     },
     getChildContext(){
         var env = this._env;
-        return {
-            env
-        }
+        return {env, transform: [1, 0, 0, 1, 0, 0]}
     },
     render(){
         return (
             <canvas {...this.props} ref="canvas">
                 {
-                    this._env ? React.Children.map(this.props.children, child=> {
-                        return React.cloneElement(child);
-                    }) : null
+                    this._env ? this.props.children : null
                 }
             </canvas>
         );

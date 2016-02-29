@@ -8,7 +8,7 @@ var ReactImage = React.createClass({
         var cachedImages = this.cachedImages = this.cachedImages || {};
         var {src} = this.props;
         var {env} = this.context;
-        env.add((context)=> {
+        env.add(context=> {
             var ahref = document.createElement('a');
             ahref.href = src;
             var cachedImage = cachedImages[ahref.href];

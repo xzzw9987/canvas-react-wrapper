@@ -5,10 +5,11 @@ var Line = React.createClass({
         env: React.PropTypes.object
     },
     render(){
+        console.log('render line');
         var {points} = this.props;
         var {env} = this.context;
         points = points || [];
-        env.add((context)=> {
+        env.add(context=> {
             points.forEach((point, index)=> {
                 if (index === 0) {
                     context.moveTo(point[0], point[1]);
@@ -19,6 +20,12 @@ var Line = React.createClass({
             });
         });
         return null;
+    },
+    componentWillMount(){
+        console.log('will mount line');
+    },
+    componentDidMount(){
+        console.log('did mount line');
     }
 });
 export default Line;
