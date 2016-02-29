@@ -18,7 +18,9 @@ var App = React.createClass({
         );
     },
     componentDidMount(){
-        setInterval(this.forceUpdate.bind(this), 500);
+        setInterval(()=> {
+            this.forceUpdate();
+        }, 500);
     }
 });
 ReactDOM.render(
