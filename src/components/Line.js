@@ -1,13 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import transformMixins from './util/transform'
 var Line = React.createClass({
+    mixins: [transformMixins],
     contextTypes: {
         env: React.PropTypes.object
     },
     render(){
-        console.log('render line');
         var {points} = this.props;
-        var {env} = this.context;
+        var {env} = this;
         points = points || [];
         env.add(context=> {
             points.forEach((point, index)=> {
@@ -22,10 +23,8 @@ var Line = React.createClass({
         return null;
     },
     componentWillMount(){
-        console.log('will mount line');
     },
     componentDidMount(){
-        console.log('did mount line');
     }
 });
 export default Line;

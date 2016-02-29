@@ -1,4 +1,3 @@
-var Promise = window.Promise;
 import math from 'mathjs';
 export default function drawEnv(context) {
     var callbackMap = [];
@@ -13,13 +12,18 @@ export default function drawEnv(context) {
         }
         context.beginPath();
         var ret = callback(context);
-        options.end ? context.closePath() : void 0;
-        context.stroke();
-        context.restore();
-        ret instanceof Promise ?
-            ret.then(loop.bind(null, index + 1, callbackMap))
-                .catch(loop.bind(null, index + 1, callbackMap))
-            : loop(index + 1, callbackMap);
+
+        function f() {
+            options.end ? context.closePath() : void 0;
+            context.stroke();
+            context.restore();
+            loop(index + 1, callbackMap);
+        }
+
+        (typeof ret === 'object' && 'then' in ret) ?
+            ret.then(f,f)
+            : f()
+
 
     }
 

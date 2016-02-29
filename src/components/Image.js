@@ -1,13 +1,15 @@
-var Promise = window.Promise;
 import React from 'react';
+import transformMixins from './util/transform'
+
 var ReactImage = React.createClass({
+    mixins: [transformMixins],
     contextTypes: {
         env: React.PropTypes.object
     },
     render(){
         var cachedImages = this.cachedImages = this.cachedImages || {};
         var {src} = this.props;
-        var {env} = this.context;
+        var {env} = this;
         env.add(context=> {
             var ahref = document.createElement('a');
             ahref.href = src;
@@ -16,7 +18,7 @@ var ReactImage = React.createClass({
                 context.drawImage(cachedImage, 0, 0, cachedImage.width, cachedImage.height);
                 return;
             }
-            var d = Promise.defer();
+            var d = $.Deferred();
             var i = new Image();
             i.src = ahref.href;
             i.addEventListener('load', ()=> {
@@ -26,7 +28,7 @@ var ReactImage = React.createClass({
                 d.reject();
             });
 
-            return d.promise.then(()=> {
+            return d.promise().then(()=> {
                 cachedImages[ahref.href] = i;
                 context.drawImage(i, 0, 0, i.width, i.height);
             });

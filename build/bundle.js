@@ -85,19 +85,35 @@
 	            { width: '500', height: '500' },
 	            _react2['default'].createElement(
 	                _componentsGroup2['default'],
-	                { transform: 'translate(200px,0)' },
+	                { transform: 'translate(0,0)' },
 	                _react2['default'].createElement(_componentsLine2['default'], { points: [[0, 200], [100, 200]],
 	                    end: false })
 	            ),
 	            _react2['default'].createElement(
 	                _componentsGroup2['default'],
-	                { transform: 'translate(400px,0)' },
-	                _react2['default'].createElement(_componentsLine2['default'], { points: [[0, 0], [100, 100]],
-	                    end: false })
+	                { transform: "rotate(" + this.state.deg + "deg)" },
+	                _react2['default'].createElement(_componentsImage2['default'], { src: 'https://ss2.bdstatic.com/lfoZeXSm1A5BphGlnYG/skin/5.jpg?2' })
 	            )
 	        );
 	    },
-	    componentDidMount: function componentDidMount() {}
+	    componentDidMount: function componentDidMount() {
+	        var me = this;
+
+	        function f() {
+	            requestAnimationFrame(f);
+	            me.setState({
+	                deg: 1 + me.state.deg
+	            });
+	        }
+
+	        f();
+	    },
+	    getInitialState: function getInitialState() {
+	        return {
+	            deg: 0
+	        };
+	    }
+
 	});
 	//                    <ReactImage src="https://ss2.bdstatic.com/lfoZeXSm1A5BphGlnYG/skin/5.jpg?2"/>
 
@@ -71249,16 +71265,20 @@
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
+	var _utilTransform = __webpack_require__(680);
+
+	var _utilTransform2 = _interopRequireDefault(_utilTransform);
+
 	var Line = _react2['default'].createClass({
 	    displayName: 'Line',
 
+	    mixins: [_utilTransform2['default']],
 	    contextTypes: {
 	        env: _react2['default'].PropTypes.object
 	    },
 	    render: function render() {
-	        console.log('render line');
 	        var points = this.props.points;
-	        var env = this.context.env;
+	        var env = this.env;
 
 	        points = points || [];
 	        env.add(function (context) {
@@ -71272,12 +71292,8 @@
 	        });
 	        return null;
 	    },
-	    componentWillMount: function componentWillMount() {
-	        console.log('will mount line');
-	    },
-	    componentDidMount: function componentDidMount() {
-	        console.log('did mount line');
-	    }
+	    componentWillMount: function componentWillMount() {},
+	    componentDidMount: function componentDidMount() {}
 	});
 	exports['default'] = Line;
 
@@ -71300,18 +71316,21 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var Promise = window.Promise;
+	var _utilTransform = __webpack_require__(680);
+
+	var _utilTransform2 = _interopRequireDefault(_utilTransform);
 
 	var ReactImage = _react2['default'].createClass({
 	    displayName: 'ReactImage',
 
+	    mixins: [_utilTransform2['default']],
 	    contextTypes: {
 	        env: _react2['default'].PropTypes.object
 	    },
 	    render: function render() {
 	        var cachedImages = this.cachedImages = this.cachedImages || {};
 	        var src = this.props.src;
-	        var env = this.context.env;
+	        var env = this.env;
 
 	        env.add(function (context) {
 	            var ahref = document.createElement('a');
@@ -71321,7 +71340,7 @@
 	                context.drawImage(cachedImage, 0, 0, cachedImage.width, cachedImage.height);
 	                return;
 	            }
-	            var d = Promise.defer();
+	            var d = $.Deferred();
 	            var i = new Image();
 	            i.src = ahref.href;
 	            i.addEventListener('load', function () {
@@ -71331,7 +71350,7 @@
 	                d.reject();
 	            });
 
-	            return d.promise.then(function () {
+	            return d.promise().then(function () {
 	                cachedImages[ahref.href] = i;
 	                context.drawImage(i, 0, 0, i.width, i.height);
 	            });
@@ -71366,6 +71385,10 @@
 
 	var _utilTransform2 = _interopRequireDefault(_utilTransform);
 
+	var _utilNormalizeTransform = __webpack_require__(681);
+
+	var _utilNormalizeTransform2 = _interopRequireDefault(_utilNormalizeTransform);
+
 	var Group = _react2['default'].createClass({
 	    displayName: 'Group',
 
@@ -71377,77 +71400,29 @@
 	        transform: _react2['default'].PropTypes.array
 	    },
 	    getChildContext: function getChildContext() {
-	        var me = this;
+	        var selfTransform = (0, _utilNormalizeTransform2['default'])(this.props.transform);
+	        var willTransform = this.context.transform;
+
+	        if (selfTransform !== 'none') {
+	            selfTransform = selfTransform.match(/matrix\((.*?),(.*?),(.*?),(.*?),(.*?),(.*?)\)/).slice(1);
+	            willTransform = (function () {
+	                var matrix = _mathjs2['default'].multiply([[willTransform[0], willTransform[2], willTransform[4]], [willTransform[1], willTransform[3], willTransform[5]], [0, 0, 1]], [[selfTransform[0], selfTransform[2], selfTransform[4]], [selfTransform[1], selfTransform[3], selfTransform[5]], [0, 0, 1]]);
+	                return [matrix[0][0], matrix[1][0], matrix[0][1], matrix[1][1], matrix[0][2], matrix[1][2]];
+	            })();
+	        }
 	        return {
-	            transform: me.context.transform
+	            transform: willTransform
 	        };
 	    },
 	    render: function render() {
 	        return _react2['default'].createElement(
 	            'div',
-	            { 'data-transform': this.props.transform },
+	            null,
 	            this.props.children
 	        );
-	    },
-	    componentWillMount: function componentWillMount() {
-	        console.log('will mount group');
-	        this.setTransform();
-	    },
-	    componentWillUpdate: function componentWillUpdate() {
-	        this.setTransform();
-	    },
-	    componentDidUpdate: function componentDidUpdate() {
-	        this.resetTransform();
-	    },
-	    componentDidMount: function componentDidMount() {
-	        console.log('did mount group');
-	        this.resetTransform();
-	    },
-	    setTransform: function setTransform() {
-	        if (!this.context.env) return;
-	        var transform = normalizeTransform(this.props.transform);
-	        if (transform !== 'none') {
-	            var env = this.context.env;
-
-	            env.add(function (context) {
-	                transform = transform.match(/matrix\((.*?),(.*?),(.*?),(.*?),(.*?),(.*?)\)/);
-	                context.transform.apply(context, transform.slice(1));
-	            });
-	        }
-	    },
-	    resetTransform: function resetTransform() {
-	        if (!this.context.env) return;
-	        var transform = normalizeTransform(this.props.transform);
-	        if (transform !== 'none') {
-	            var env = this.context.env;
-
-	            env.add(function (context) {
-	                transform = transform.match(/matrix\((.*?),(.*?),(.*?),(.*?),(.*?),(.*?)\)/);
-	                var m00 = transform[1];
-	                var m10 = transform[2];
-	                var m01 = transform[3];
-	                var m11 = transform[4];
-	                var m02 = transform[5];
-	                var m12 = transform[6];
-	                var inverse = _mathjs2['default'].inv([[m00, m01, m02], [m10, m11, m12], [0, 0, 1]]);
-	                console.log('----inverse');
-	                console.log(JSON.stringify(inverse));
-	                console.log('----');
-	                context.transform(inverse[0][0], inverse[1][0], inverse[0][1], inverse[1][1], inverse[0][2], inverse[1][2]);
-	            });
-	        }
 	    }
 	});
 	exports['default'] = Group;
-
-	function normalizeTransform(transform) {
-	    var div = document.createElement('div');
-	    div.style.transform = transform;
-	    document.body.appendChild(div);
-	    var ret = getComputedStyle(div).transform;
-	    div.remove();
-	    return ret;
-	}
 	module.exports = exports['default'];
 
 /***/ },
@@ -71467,8 +71442,6 @@
 
 	var _mathjs2 = _interopRequireDefault(_mathjs);
 
-	var Promise = window.Promise;
-
 	function drawEnv(context) {
 	    var callbackMap = [];
 
@@ -71485,10 +71458,15 @@
 	        }
 	        context.beginPath();
 	        var ret = callback(context);
-	        options.end ? context.closePath() : void 0;
-	        context.stroke();
-	        context.restore();
-	        ret instanceof Promise ? ret.then(loop.bind(null, index + 1, callbackMap))['catch'](loop.bind(null, index + 1, callbackMap)) : loop(index + 1, callbackMap);
+
+	        function f() {
+	            options.end ? context.closePath() : void 0;
+	            context.stroke();
+	            context.restore();
+	            loop(index + 1, callbackMap);
+	        }
+
+	        typeof ret === 'object' && 'then' in ret ? ret.then(f, f) : f();
 	    }
 
 	    function add(callback) {
@@ -71517,19 +71495,29 @@
 
 	'use strict';
 
+	var _Object$assign = __webpack_require__(660)['default'];
+
 	var _interopRequireDefault = __webpack_require__(1)['default'];
 
 	Object.defineProperty(exports, '__esModule', {
 	    value: true
 	});
 
-	var _transform = __webpack_require__(680);
+	var _react = __webpack_require__(500);
 
-	var _transform2 = _interopRequireDefault(_transform);
+	var _react2 = _interopRequireDefault(_react);
+
+	var _normalizeTransform = __webpack_require__(681);
+
+	var _normalizeTransform2 = _interopRequireDefault(_normalizeTransform);
+
+	var _mathjs = __webpack_require__(2);
+
+	var _mathjs2 = _interopRequireDefault(_mathjs);
 
 	exports['default'] = {
 	    contextTypes: {
-	        transform: React.PropTypes.array
+	        transform: _react2['default'].PropTypes.array
 	    },
 	    componentWillMount: function componentWillMount() {
 	        this.withTransform();
@@ -71538,20 +71526,50 @@
 	        this.withTransform();
 	    },
 	    withTransform: function withTransform() {
-	        if (!this.props.transform) {
-	            return;
-	        }
-	        var transform = (0, _transform2['default'])(this.props.transform);
-	        if (transform !== 'none') {
-	            var env = this.context.env;
+	        var selfTransform = (0, _normalizeTransform2['default'])(this.props.transform);
+	        var willTransform = this.context.transform;
 
-	            env.add(function (context) {
-	                transform = transform.match(/matrix\((.*?),(.*?),(.*?),(.*?),(.*?),(.*?)\)/);
-	                context.transform.apply(context, transform.slice(1));
-	            });
+	        if (selfTransform !== 'none') {
+	            selfTransform = selfTransform.match(/matrix\((.*?),(.*?),(.*?),(.*?),(.*?),(.*?)\)/).slice(1);
+	            willTransform = (function () {
+	                var matrix = _mathjs2['default'].multiply([[willTransform[0], willTransform[2], willTransform[4]], [willTransform[1], willTransform[3], willTransform[5]], [0, 0, 1]], [[selfTransform[0], selfTransform[2], selfTransform[4]], [selfTransform[1], selfTransform[3], selfTransform[5]], [0, 0, 1]]);
+	                return [matrix[0][0], matrix[1][0], matrix[0][1], matrix[1][1], matrix[0][2], matrix[1][2]];
+	            })();
 	        }
+	        var env = this.context.env;
+	        this.env = _Object$assign({}, env, {
+	            add: function add(callback, options) {
+	                function cb(context) {
+	                    context.transform.apply(context, willTransform);
+	                    return callback(context);
+	                }
+
+	                env.add(cb, options);
+	            }
+	        });
 	    }
 	};
+	module.exports = exports['default'];
+
+/***/ },
+/* 681 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	exports['default'] = function (transform) {
+	    var div = document.createElement('div');
+	    div.style.transform = transform;
+	    document.body.appendChild(div);
+	    var ret = getComputedStyle(div).transform;
+	    div.remove();
+	    return ret;
+	};
+
 	module.exports = exports['default'];
 
 /***/ }

@@ -1,4 +1,6 @@
-import normalizeTransform from './transform';
+import React from 'react';
+import normalizeTransform from './normalizeTransform';
+import math from 'mathjs';
 export default {
     contextTypes: {
         transform: React.PropTypes.array
@@ -10,16 +12,40 @@ export default {
         this.withTransform();
     },
     withTransform(){
-        if (!this.props.transform) {
-            return;
+        var selfTransform = normalizeTransform(this.props.transform);
+        var willTransform = this.context.transform;
+
+        if (selfTransform !== 'none') {
+            selfTransform = selfTransform.match(/matrix\((.*?),(.*?),(.*?),(.*?),(.*?),(.*?)\)/).slice(1);
+            willTransform = (function () {
+                var matrix = math.multiply(
+                    [
+                        [willTransform[0], willTransform[2], willTransform[4]],
+                        [willTransform[1], willTransform[3], willTransform[5]],
+                        [0, 0, 1]
+                    ]
+                    ,
+                    [
+                        [selfTransform[0], selfTransform[2], selfTransform[4]],
+                        [selfTransform[1], selfTransform[3], selfTransform[5]],
+                        [0, 0, 1]
+                    ]
+                );
+                return [
+                    matrix[0][0], matrix[1][0], matrix[0][1], matrix[1][1], matrix[0][2], matrix[1][2]
+                ]
+            })();
         }
-        var transform = normalizeTransform(this.props.transform);
-        if (transform !== 'none') {
-            var {env} = this.context;
-            env.add(context=> {
-                transform = transform.match(/matrix\((.*?),(.*?),(.*?),(.*?),(.*?),(.*?)\)/);
-                context.transform.apply(context, transform.slice(1));
-            });
-        }
+        var env = this.context.env;
+        this.env = Object.assign({}, env, {
+            add(callback, options){
+                function cb(context) {
+                    context.transform.apply(context, willTransform);
+                    return callback(context);
+                }
+
+                env.add(cb, options);
+            }
+        });
     }
 };
