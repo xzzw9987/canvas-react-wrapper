@@ -15,13 +15,13 @@ export default function drawEnv(context) {
 
         function f() {
             options.end ? context.closePath() : void 0;
-            context.stroke();
+            options.type === 'fill' ? context.fill() : context.stroke();
             context.restore();
             loop(index + 1, callbackMap);
         }
 
         (typeof ret === 'object' && 'then' in ret) ?
-            ret.then(f,f)
+            ret.then(f, f)
             : f()
 
 

@@ -1,14 +1,13 @@
 import $ from 'jquery';
 import React from 'react';
 import transformMixins from './util/transform'
-
+var cachedImages = {};
 var ReactImage = React.createClass({
     mixins: [transformMixins],
     contextTypes: {
         env: React.PropTypes.object
     },
     render(){
-        var cachedImages = this.cachedImages = this.cachedImages || {};
         var {src} = this.props;
         var {env} = this;
         env.add(context=> {

@@ -72,49 +72,96 @@
 
 	var _componentsImage2 = _interopRequireDefault(_componentsImage);
 
-	var _componentsGroup = __webpack_require__(682);
+	var _componentsPath = __webpack_require__(682);
+
+	var _componentsPath2 = _interopRequireDefault(_componentsPath);
+
+	var _componentsGroup = __webpack_require__(683);
 
 	var _componentsGroup2 = _interopRequireDefault(_componentsGroup);
 
+	var width;
+	var height;
+	resize();
 	var App = _react2['default'].createClass({
 	    displayName: 'App',
 
 	    render: function render() {
+	        var children = this.state.children;
+	        for (var i = 0; i < 10; i++) {
+	            for (var j = 0; j < 10; j++) {
+	                var value = children[i * 10 + j];
+	                if (value === undefined) {
+	                    value = {
+	                        y: 128 * i,
+	                        x: j * 128
+	                    };
+	                } else {
+	                    value.y -= 5;
+	                    if (value.y < -1 * 128) {
+	                        value.y += 1280;
+	                    }
+	                }
+	                children[i * 10 + j] = value;
+	            }
+	        }
+
+	        //console.log(children);
+
 	        return _react2['default'].createElement(
 	            _componentsCanvas2['default'],
-	            { width: '500', height: '500' },
-	            _react2['default'].createElement(
-	                _componentsGroup2['default'],
-	                { transform: 'translate(0,0)' },
-	                _react2['default'].createElement(_componentsLine2['default'], { points: [[0, 200], [100, 200]],
-	                    end: false })
-	            ),
-	            _react2['default'].createElement(
-	                _componentsGroup2['default'],
-	                { transform: "rotate(" + this.state.deg + "deg)" },
-	                _react2['default'].createElement(_componentsImage2['default'], { src: 'https://ss2.bdstatic.com/lfoZeXSm1A5BphGlnYG/skin/5.jpg?2' })
-	            )
+	            { width: width, height: height },
+	            children.map(function (item) {
+	                return _react2['default'].createElement(
+	                    _componentsGroup2['default'],
+	                    { transform: "translate(" + item.x + "px," + item.y + "px)" },
+	                    _react2['default'].createElement(_componentsImage2['default'], { src: './rocket.png' })
+	                );
+	            })
 	        );
 	    },
 	    componentDidMount: function componentDidMount() {
+	        var _this = this;
+
 	        var me = this;
+	        var dir = 1;
 
 	        function f() {
 	            requestAnimationFrame(f);
+	            if (me.state.radius > 200) {
+	                dir = -1;
+	            } else if (me.state.radius < 100) {
+	                dir = 1;
+	            }
 	            me.setState({
+	                radius: dir * 2 + me.state.radius,
 	                deg: 1 + me.state.deg
 	            });
 	        }
 
 	        f();
+
+	        window.addEventListener('resize', function () {
+	            resize();
+	            _this.setState({});
+	        });
 	    },
 	    getInitialState: function getInitialState() {
 	        return {
-	            deg: 0
+	            deg: 0,
+	            radius: 100,
+	            children: []
 	        };
 	    }
 
 	});
+
+	function resize() {
+	    width = window.innerWidth;
+	    height = window.innerHeight;
+
+	    console.log(width, height);
+	}
 	//                    <ReactImage src="https://ss2.bdstatic.com/lfoZeXSm1A5BphGlnYG/skin/5.jpg?2"/>
 
 	_reactDom2['default'].render(_react2['default'].createElement(App, null), document.querySelector('.root'));
@@ -71280,7 +71327,7 @@
 
 	        function f() {
 	            options.end ? context.closePath() : void 0;
-	            context.stroke();
+	            options.type === 'fill' ? context.fill() : context.stroke();
 	            context.restore();
 	            loop(index + 1, callbackMap);
 	        }
@@ -71470,6 +71517,7 @@
 
 	var _utilTransform2 = _interopRequireDefault(_utilTransform);
 
+	var cachedImages = {};
 	var ReactImage = _react2['default'].createClass({
 	    displayName: 'ReactImage',
 
@@ -71478,7 +71526,6 @@
 	        env: _react2['default'].PropTypes.object
 	    },
 	    render: function render() {
-	        var cachedImages = this.cachedImages = this.cachedImages || {};
 	        var src = this.props.src;
 	        var env = this.env;
 
@@ -71530,6 +71577,47 @@
 
 /***/ },
 /* 682 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _interopRequireDefault = __webpack_require__(1)['default'];
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	var _react = __webpack_require__(500);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _utilTransform = __webpack_require__(677);
+
+	var _utilTransform2 = _interopRequireDefault(_utilTransform);
+
+	exports['default'] = _react2['default'].createClass({
+	    displayName: 'Path',
+
+	    mixins: [_utilTransform2['default']],
+	    contextTypes: {
+	        env: _react2['default'].PropTypes.object
+	    },
+	    render: function render() {
+	        var draw = this.props.draw;
+	        var env = this.env;
+
+	        env.add(function (context) {
+	            draw(context);
+	        }, {
+	            type: this.props.type
+	        });
+	        return null;
+	    }
+	});
+	module.exports = exports['default'];
+
+/***/ },
+/* 683 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
