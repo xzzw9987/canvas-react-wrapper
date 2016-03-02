@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import React from 'react';
 import transformMixins from './util/transform'
 
