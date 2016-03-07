@@ -4,13 +4,11 @@ import transformMixins from './util/transform';
 import normalizeTransform from './util/normalizeTransform';
 var Group = React.createClass({
     mixins: [transformMixins],
-    contextTypes: {
-        env: React.PropTypes.object
-    },
     childContextTypes: {
         transform: React.PropTypes.array
     },
     getChildContext(){
+
         var selfTransform = normalizeTransform(this.props.transform);
         var willTransform = this.context.transform;
 

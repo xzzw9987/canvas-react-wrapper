@@ -33,15 +33,12 @@ var App = React.createClass({
             }
         }
 
-        //console.log(children);
-
-
         return (
             <Canvas width={width} height={height}>
                 {
                     children.map(item=> {
                         return (
-                            <Group transform={"translate(" + item.x +"px," + item.y +"px)"}>
+                            <Group transform={"matrix(1,0,0,1," + item.x + "," + item.y + ")"}>
                                 <ReactImage src="./rocket.png"></ReactImage>
                             </Group>
                         );

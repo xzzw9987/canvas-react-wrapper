@@ -5,10 +5,14 @@ export default {
     contextTypes: {
         transform: React.PropTypes.array
     },
+    childContextTypes: {
+        transform: React.PropTypes.array,
+        env: React.PropTypes.object
+    },
     componentWillMount(){
         this.withTransform();
     },
-    componentWillUpdate(){
+    componentWillReceiveProps(){
         this.withTransform();
     },
     withTransform(){

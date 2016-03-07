@@ -106,15 +106,13 @@
 	            }
 	        }
 
-	        //console.log(children);
-
 	        return _react2['default'].createElement(
 	            _componentsCanvas2['default'],
 	            { width: width, height: height },
 	            children.map(function (item) {
 	                return _react2['default'].createElement(
 	                    _componentsGroup2['default'],
-	                    { transform: "translate(" + item.x + "px," + item.y + "px)" },
+	                    { transform: "matrix(1,0,0,1," + item.x + "," + item.y + ")" },
 	                    _react2['default'].createElement(_componentsImage2['default'], { src: './rocket.png' })
 	                );
 	            })
@@ -71440,10 +71438,14 @@
 	    contextTypes: {
 	        transform: _react2['default'].PropTypes.array
 	    },
+	    childContextTypes: {
+	        transform: _react2['default'].PropTypes.array,
+	        env: _react2['default'].PropTypes.object
+	    },
 	    componentWillMount: function componentWillMount() {
 	        this.withTransform();
 	    },
-	    componentWillUpdate: function componentWillUpdate() {
+	    componentWillReceiveProps: function componentWillReceiveProps() {
 	        this.withTransform();
 	    },
 	    withTransform: function withTransform() {
@@ -71483,12 +71485,7 @@
 	});
 
 	exports['default'] = function (transform) {
-	    var div = document.createElement('div');
-	    div.style.transform = transform;
-	    document.body.appendChild(div);
-	    var ret = getComputedStyle(div).transform;
-	    div.remove();
-	    return ret;
+	    return transform || 'none';
 	};
 
 	module.exports = exports['default'];
@@ -71648,13 +71645,11 @@
 	    displayName: 'Group',
 
 	    mixins: [_utilTransform2['default']],
-	    contextTypes: {
-	        env: _react2['default'].PropTypes.object
-	    },
 	    childContextTypes: {
 	        transform: _react2['default'].PropTypes.array
 	    },
 	    getChildContext: function getChildContext() {
+
 	        var selfTransform = (0, _utilNormalizeTransform2['default'])(this.props.transform);
 	        var willTransform = this.context.transform;
 
