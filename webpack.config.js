@@ -18,6 +18,7 @@ module.exports = {
          */
         publicPath: './build/',
         chunkFilename: '[chunkhash].bundle.js'
+        
     },
     module: {
         loaders: [
